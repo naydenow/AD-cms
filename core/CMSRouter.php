@@ -43,8 +43,10 @@ class CMSRouter {
 		$component_uri = explode('/', trim($component_uri, ' /'));
 		$co =  count($component_uri);
 
+
+
 		if ($co >= 1 && $component_uri[0] != ''){
-			$controller = $component_uri[0];
+			$masp['controller'] = $component_uri[0];
 		}
 
 		if ($co >= 2){

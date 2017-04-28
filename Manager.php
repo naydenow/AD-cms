@@ -23,24 +23,24 @@ class Manager {
 	static public function initComponent($name, $options = [])  { 
 		self::init();
 
-		$componentIndexFile = COMPONENTS.$name.'/index.php';
+		$class_name = 'CMS'.ucfirst($name);
+		
 
-		$name = 'CMS'.ucfirst($name);
-
-		if (empty(self::$classCache[$name])){
-			if (file_exists($componentIndexFile)){
-
-				include_once($componentIndexFile);
-
-
-				self::$classCache[$name] = $name;
-
+		if (empty(self::$classCache[$class_name])){
+			if (file_exists(COMPONENTS.$name)){
+				$path = COMPONENTS.$name;
+				include_once($path.'/index.php');
+				self::$classCache[$class_name] = $class_name;
+			} else if (file_exists(CUSTOM_COMPONENTS.$name)){
+				$path = CUSTOM_COMPONENTS.$name;
+				include_once($path .'/index.php');
+				self::$classCache[$class_name] = $class_name;
 			} else {
-				throw new Exception("Component not found: ".$name, 1);
+				throw new Exception("Component not found: ".$class_name, 1);
 			}
 		}
 
-		return new self::$classCache[$name]($options);
+		return new self::$classCache[$class_name]($options, $path);
 	}
 
 	static public function clearCache(){

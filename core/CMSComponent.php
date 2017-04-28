@@ -7,32 +7,38 @@ class CMSComponent {
 	public  $componentName;
 	public  $initOptions;
 	public 	$request;
+	public  $path;
 
-	function __construct($options = []){
+	function __construct($options = [], $path){
+		$this->path = $path;
 		$this->componentName = $this->parseComponentName();
 		$this->initOptions   = $options;
-
 		$this->initRouts();	
-
 		$this->request = CMSRouter::apply($this);
 
-		$custom_controller = CUSTOM_COMPONENTS.$this->componentName.'/controller/'.$this->request['controller'].'.php';
-		$controller = COMPONENTS.$this->componentName.'/controller/'.$this->request['controller'].'.php';
+		if (empty($this->request['controller']))
+			$this->request['controller'] = 'index';
 
-		if (file_exists($custom_controller)){
-			$this->load($custom_controller);
-		} else if (file_exists($controller)){
-			$this->load($controller);
+		if (empty($this->request['action']))
+			$this->request['action'] = 'index';
+
+		//$custom_controller = CUSTOM_COMPONENTS.$this->componentName.'/controller/'.$this->request['controller'].'.php';
+		//
+		$controller = $this->path.'/controller/'.$this->request['controller'].'.php';
+
+
+		if (file_exists($controller)){
+			$this->load($controller, COMPONENTS.$this->componentName);
 		} else {
-			throw new Exception("Controller not found", 1);
-			
+			echo("Controller not found");
 		}
 	} 
 
 	private function load($controller_path){
+
 		include($controller_path);
 
-		$class = new $this->request['controller']($this);
+		$class = new $this->request['controller']($this->request['controller'], $this->path, $this);
 		$act = ($this->request['action'] ? $this->request['action'] : 'e404').'_action';
 
 		if(method_exists($class,$act)){
@@ -46,15 +52,10 @@ class CMSComponent {
 	}
 
 	private function initRouts(){
-		$custom_routs = CUSTOM_COMPONENTS.$this->componentName.'/routs.php';
-		$routs = COMPONENTS.$this->componentName.'/routs.php';
+		$routs = $this->path.'/routs.php';
 
 		if (file_exists($routs)){
 			$this->routs = include($routs);
-		}
-
-		if (file_exists($custom_routs)){
-			$this->routs = array_merge($this->routs,include($custom_routs));
 		}
 	}
 

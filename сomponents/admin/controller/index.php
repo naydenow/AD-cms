@@ -1,8 +1,9 @@
 <?php 
 
-class index extends ad_controller {
+class index extends cms_core_CMSComponentController {
 	public function index_action(){ 
-		var_dump($this);
+		$this->setTemplate('main');
+		$this->view(['bread_crumbs'=>['title'=>'Index']],'index')->render();
 	}
 	
 
